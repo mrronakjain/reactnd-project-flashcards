@@ -1,13 +1,7 @@
 import React, { Component } from "react";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import {
-  purple,
-  white,
-  blue,
-  gray,
-  orange
-} from "../utils/colors";
-import { getDecks, saveDeckTitle } from "../utils/deckstorage";
+import { purple, white, blue, gray, orange } from "../utils/colors";
+import { getDeck, getDecks, saveDeckTitle } from "../utils/deckstorage";
 
 import {
   View,
@@ -31,7 +25,7 @@ function SubmitBtn({ onPress }) {
   );
 }
 
-export default class App extends Component {
+export default class NewDeck extends Component {
   constructor(props) {
     super(props);
     this.state = { title: "", deckExists: false };
@@ -39,8 +33,7 @@ export default class App extends Component {
   onChangeText = title => {
     this.setState({ title: title });
     if (title && title.trim() != "") {
-      var deck = getDecks().then(results => {
-        var deck = results === null ? results : JSON.parse(results)[title];
+      getDeck(title).then(deck => {
         if (deck) {
           this.setState({ deckExists: true });
         } else {
@@ -64,7 +57,9 @@ export default class App extends Component {
         resetScrollToCoords={{ x: 0, y: 0 }}
       >
         <View style={styles.textWrapper}>
-          <Text style={styles.titleLabel}>What is the title of your new deck?</Text>
+          <Text style={styles.titleLabel}>
+            What is the title of your new deck?
+          </Text>
           <TextInput
             style={styles.titleTextInput}
             onChangeText={this.onChangeText}
@@ -76,11 +71,15 @@ export default class App extends Component {
         {this.state.deckExists && (
           <View style={styles.errorContainer}>
             <Text style={styles.errorLabel}>
-              Deck with title <Text style={{ fontWeight: "800", fontStyle: "italic" }}>
+              Deck with title{" "}
+              <Text style={{ fontWeight: "800", fontStyle: "italic" }}>
                 {this.state.title}
-              </Text> already exists.
+              </Text>{" "}
+              already exists.
             </Text>
-            <Text style={styles.errorLabel}>Please provide different title.</Text>
+            <Text style={styles.errorLabel}>
+              Please provide different title.
+            </Text>
           </View>
         )}
         <SubmitBtn onPress={this.submit} disabled={this.state.deckExists} />
@@ -93,7 +92,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
-    alignItems: "center",
     marginLeft: 30,
     marginRight: 30,
     alignItems: "stretch"
@@ -130,7 +128,7 @@ const styles = StyleSheet.create({
     borderColor: gray,
     borderWidth: 1,
     fontSize: 20,
-    borderRadius: 5,
+    borderRadius: Platform.OS === 'ios' ? 7 : 2,
     paddingVertical: 7.5,
     paddingHorizontal: 15,
     backgroundColor: white,
