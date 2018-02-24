@@ -47,6 +47,7 @@ export default class NewDeck extends Component {
     if (title && title.trim() != "") {
       saveDeckTitle(title);
       this.setState({ title: "" });
+      this.props.navigation.navigate("ViewDeck", { deck: {title: title} });
     }
   };
   render() {

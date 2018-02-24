@@ -6,6 +6,7 @@ import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { Constants } from "expo";
 import NewDeck from "./components/NewDeck";
 import DeckList from "./components/DeckList";
+import ViewDeck from "./components/ViewDeck";
 
 function UdaciStatusBar({ backgroundColor, ...props }) {
   return (
@@ -60,6 +61,28 @@ const Tabs = TabNavigator(
 const MainNavigator = StackNavigator({
   Home: {
     screen: Tabs
+  },
+  DeckList: {
+    screen: DeckList,
+    path: "decks",
+    navigationOptions: () => ({
+      title: `Decks`,
+      headerTintColor: white,
+      headerStyle: {
+        backgroundColor: purple
+      }
+    })
+  },
+  ViewDeck: {
+    screen: ViewDeck,
+    path: "decks/:title",
+    navigationOptions: ({ navigation }) => ({
+      title: `${navigation.state.params.deck.title}`,
+      headerTintColor: white,
+      headerStyle: {
+        backgroundColor: purple
+      }
+    })
   }
 });
 
@@ -67,7 +90,7 @@ export default class App extends Component {
   render() {
     return (
       <View style={styles.container}>
-        <UdaciStatusBar backgroundColor={blue} barStyle="light-content" />
+        <UdaciStatusBar backgroundColor={purple} barStyle="light-content" />
         <MainNavigator />
       </View>
     );
