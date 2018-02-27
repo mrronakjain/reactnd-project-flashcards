@@ -52,7 +52,7 @@ export default class DeckList extends Component {
       <TouchableOpacity
         style={styles.deckListItem}
         onPress={() =>
-          this.props.navigation.navigate("ViewDeck", { deck: item })
+          this.props.navigation.navigate("ViewDeck", { title: item.title })
         }
       >
         <Text style={styles.deckListItemText}>{item.title}</Text>

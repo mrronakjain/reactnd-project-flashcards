@@ -47,15 +47,23 @@ export default class ViewDeck extends Component {
   }
 
   onAddCard = () => {
-    
+    const { title } = this.props.navigation.state.params;
+    this.props.navigation.navigate("AddCard", {
+      title: title,
+      refresh: this.refreshFunction
+    });
   };
-
-  onShowQuiz = () => {
-    
+  refreshFunction = () => {
+    const { title } = this.props.navigation.state.params;
+    getDeck(title).then(deck => {
+      if (deck) {
+        this.setState({ deck: deck, ready: true });
+      }
+    });
   };
-
+  onShowQuiz = () => {};
   componentDidMount() {
-    const { title } = this.props.navigation.state.params.deck;
+    const { title } = this.props.navigation.state.params;
     getDeck(title).then(deck => {
       if (deck) {
         this.setState({ deck: deck, ready: true });

@@ -7,6 +7,7 @@ import { Constants } from "expo";
 import NewDeck from "./components/NewDeck";
 import DeckList from "./components/DeckList";
 import ViewDeck from "./components/ViewDeck";
+import AddCard from "./components/AddCard";
 
 function UdaciStatusBar({ backgroundColor, ...props }) {
   return (
@@ -77,7 +78,18 @@ const MainNavigator = StackNavigator({
     screen: ViewDeck,
     path: "decks/:title",
     navigationOptions: ({ navigation }) => ({
-      title: `${navigation.state.params.deck.title}`,
+      title: `${navigation.state.params.title}`,
+      headerTintColor: white,
+      headerStyle: {
+        backgroundColor: purple
+      }
+    })
+  },
+  AddCard: {
+    screen: AddCard,
+    path: "decks/:title/addcard",
+    navigationOptions: ({ navigation }) => ({
+      title: "Add Card",
       headerTintColor: white,
       headerStyle: {
         backgroundColor: purple

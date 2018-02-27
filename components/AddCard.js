@@ -1,7 +1,8 @@
 import React, { Component } from "react";
+import PropTypes from "prop-types";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { purple, white, blue, gray, orange } from "../utils/colors";
-import { getDeck, getDecks, saveDeckTitle } from "../utils/deckstorage";
+import { addCardToDeck } from "../utils/deckstorage";
 
 import {
   View,
@@ -25,29 +26,30 @@ function SubmitBtn({ onPress }) {
   );
 }
 
-export default class NewDeck extends Component {
+export default class AddCard extends Component {
+  static propTypes = {
+    navigation: PropTypes.object.isRequired
+  };
   constructor(props) {
     super(props);
-    this.state = { title: "", deckExists: false };
+    this.state = { question: "", answer: "" };
   }
-  onChangeText = title => {
-    this.setState({ title: title });
-    if (title && title.trim() != "") {
-      getDeck(title).then(deck => {
-        if (deck) {
-          this.setState({ deckExists: true });
-        } else {
-          this.setState({ deckExists: false });
-        }
-      });
-    }
+  onQuestionChangeText = question => {
+    this.setState({ question: question });
+  };
+  onAnswerChangeText = answer => {
+    this.setState({ answer: answer });
   };
   submit = () => {
-    var title = this.state.title;
-    if (title && title.trim() != "") {
-      saveDeckTitle(title);
-      this.setState({ title: "" });
-      this.props.navigation.navigate("ViewDeck", { title: title });
+    const { title } = this.props.navigation.state.params;
+    var question = this.state.question;
+    var answer = this.state.answer;
+    if (question && question.trim() != "" && answer && answer.trim() != "") {
+      addCardToDeck(title, { question: question, answer: answer }).then(() => {
+        this.setState({ question: "", answer: "" });
+        this.props.navigation.state.params.refresh();
+        this.props.navigation.goBack();
+      }); 
     }
   };
   render() {
@@ -58,32 +60,24 @@ export default class NewDeck extends Component {
         resetScrollToCoords={{ x: 0, y: 0 }}
       >
         <View style={styles.textWrapper}>
-          <Text style={styles.titleLabel}>
-            What is the title of your new deck?
-          </Text>
+          <Text style={styles.titleLabel}>Question</Text>
           <TextInput
             style={styles.titleTextInput}
-            onChangeText={this.onChangeText}
-            value={this.state.title}
+            onChangeText={this.onQuestionChangeText}
+            value={this.state.question}
+            returnKeyType="next"
+            placeholder="Question"
+          />
+          <Text style={styles.titleLabel}>Answer</Text>
+          <TextInput
+            style={styles.titleTextInput}
+            onChangeText={this.onAnswerChangeText}
+            value={this.state.answer}
             returnKeyType="done"
-            placeholder="Deck title"
+            placeholder="Answer"
           />
         </View>
-        {this.state.deckExists && (
-          <View style={styles.errorContainer}>
-            <Text style={styles.errorLabel}>
-              Deck with title{" "}
-              <Text style={{ fontWeight: "800", fontStyle: "italic" }}>
-                {this.state.title}
-              </Text>{" "}
-              already exists.
-            </Text>
-            <Text style={styles.errorLabel}>
-              Please provide different title.
-            </Text>
-          </View>
-        )}
-        <SubmitBtn onPress={this.submit} disabled={this.state.deckExists} />
+        <SubmitBtn onPress={this.submit} />
       </KeyboardAwareScrollView>
     );
   }

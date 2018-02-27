@@ -23,3 +23,28 @@ export function saveDeckTitle(title) {
     })
   );
 }
+
+export function addCardToDeck(title, card) {
+  return getDeck(title).then(deck => {
+    if (deck) {
+      deck.questions.push(card);
+      return AsyncStorage.mergeItem(
+        DECKS_STORAGE_KEY,
+        JSON.stringify({
+          [title]: deck
+        })
+      );
+    } else {
+      deck = {
+        title: title,
+        questions: [{ question: card.question, answer: card.answer }]
+      };
+      return AsyncStorage.mergeItem(
+        DECKS_STORAGE_KEY,
+        JSON.stringify({
+          [title]: deck
+        })
+      );
+    }
+  });
+}
