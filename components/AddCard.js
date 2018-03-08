@@ -49,7 +49,7 @@ export default class AddCard extends Component {
         this.setState({ question: "", answer: "" });
         this.props.navigation.state.params.refresh();
         this.props.navigation.goBack();
-      }); 
+      });
     }
   };
   render() {

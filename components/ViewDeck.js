@@ -9,8 +9,13 @@ import {
   TouchableOpacity,
   Text,
   StyleSheet,
-  Platform
+  Platform,
+  Alert
 } from "react-native";
+
+function showAlert(title, message) {
+  Alert.alert(title, message, [{ text: "OK" }], { cancelable: false });
+}
 
 function QuizBtn({ onPress }) {
   return (
@@ -61,7 +66,17 @@ export default class ViewDeck extends Component {
       }
     });
   };
-  onShowQuiz = () => {};
+  onShowQuiz = () => {
+    const { title } = this.props.navigation.state.params;
+    const { deck } = this.state;
+    if (deck.questions && deck.questions.length > 0) {
+      this.props.navigation.navigate("Quiz", {
+        title: title
+      });
+    } else {
+      showAlert("Error!", "Add cards first, in order to start the quiz.");
+    }
+  };
   componentDidMount() {
     const { title } = this.props.navigation.state.params;
     getDeck(title).then(deck => {

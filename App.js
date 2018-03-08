@@ -8,6 +8,7 @@ import NewDeck from "./components/NewDeck";
 import DeckList from "./components/DeckList";
 import ViewDeck from "./components/ViewDeck";
 import AddCard from "./components/AddCard";
+import Quiz from "./components/Quiz";
 
 function UdaciStatusBar({ backgroundColor, ...props }) {
   return (
@@ -90,6 +91,17 @@ const MainNavigator = StackNavigator({
     path: "decks/:title/addcard",
     navigationOptions: ({ navigation }) => ({
       title: "Add Card",
+      headerTintColor: white,
+      headerStyle: {
+        backgroundColor: purple
+      }
+    })
+  },
+  Quiz: {
+    screen: Quiz,
+    path: "decks/:title/quiz",
+    navigationOptions: ({ navigation }) => ({
+      title: "Quiz",
       headerTintColor: white,
       headerStyle: {
         backgroundColor: purple

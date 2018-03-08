@@ -20,7 +20,7 @@ function SubmitBtn({ onPress }) {
       }
       onPress={onPress}
     >
-      <Text style={styles.submitBtnText}>Submit</Text>
+      <Text style={styles.submitBtnText}>CREATE DECK</Text>
     </TouchableOpacity>
   );
 }
