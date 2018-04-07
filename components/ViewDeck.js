@@ -3,6 +3,10 @@ import { AppLoading } from "expo";
 import PropTypes from "prop-types";
 import { purple, white, blue, gray, orange } from "../utils/colors";
 import { getDeck } from "../utils/deckstorage";
+import {
+  clearLocalNotification,
+  setLocalNotification
+} from "../utils/notifications";
 
 import {
   View,
@@ -70,6 +74,7 @@ export default class ViewDeck extends Component {
     const { title } = this.props.navigation.state.params;
     const { deck } = this.state;
     if (deck.questions && deck.questions.length > 0) {
+      clearLocalNotification().then(setLocalNotification);
       this.props.navigation.navigate("Quiz", {
         title: title
       });

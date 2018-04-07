@@ -9,6 +9,7 @@ import DeckList from "./components/DeckList";
 import ViewDeck from "./components/ViewDeck";
 import AddCard from "./components/AddCard";
 import Quiz from "./components/Quiz";
+import { setLocalNotification } from "./utils/notifications";
 
 function UdaciStatusBar({ backgroundColor, ...props }) {
   return (
@@ -111,6 +112,9 @@ const MainNavigator = StackNavigator({
 });
 
 export default class App extends Component {
+  componentDidMount() {
+    setLocalNotification();
+  }
   render() {
     return (
       <View style={styles.container}>
