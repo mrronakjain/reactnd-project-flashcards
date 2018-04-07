@@ -43,9 +43,7 @@ function IncorrectBtn({ onPress }) {
 function BackBtn({ onPress, text }) {
   return (
     <TouchableOpacity
-      style={
-        Platform.OS === "ios" ? styles.iosBackBtn : styles.androidBackBtn
-      }
+      style={Platform.OS === "ios" ? styles.iosBackBtn : styles.androidBackBtn}
       onPress={onPress}
     >
       <Text style={styles.backBtnText}>{text}</Text>
@@ -151,7 +149,7 @@ export default class Quiz extends Component {
               </View>
             ) : (
               <View style={styles.btnContainer}>
-                <BackBtn onPress={this.onRestartQuiz} text="Restart Quiz"/>
+                <BackBtn onPress={this.onRestartQuiz} text="Restart Quiz" />
                 <BackBtn onPress={this.onBackToDeck} text="Back to Deck" />
               </View>
             )}
