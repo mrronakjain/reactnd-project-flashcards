@@ -1,56 +1,34 @@
 import React, { Component } from "react";
+import { Keyboard } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { purple, white, blue, gray, orange } from "../utils/colors";
-import { getDeck, getDecks, saveDeckTitle } from "../utils/deckstorage";
+import { white, blue, gray, orange } from "../utils/colors";
+import { connect } from "react-redux";
+import { SubmitBtn } from "../components/buttons/NewDeck";
+import createNewDeck from "../state/actions/decks/action.createNewDeck";
+import getDeckIds from "../state/selectors/decks/selector.getDeckIds";
 
-import {
-  View,
-  TouchableOpacity,
-  Text,
-  TextInput,
-  StyleSheet,
-  Platform
-} from "react-native";
+import { View, Text, TextInput, StyleSheet, Platform } from "react-native";
 
-function SubmitBtn({ onPress }) {
-  return (
-    <TouchableOpacity
-      style={
-        Platform.OS === "ios" ? styles.iosSubmitBtn : styles.androidSubmitBtn
-      }
-      onPress={onPress}
-    >
-      <Text style={styles.submitBtnText}>CREATE DECK</Text>
-    </TouchableOpacity>
-  );
-}
-
-export default class NewDeck extends Component {
+class NewDeck extends Component {
   constructor(props) {
     super(props);
-    this.state = { title: "", deckExists: false };
+    this.state = { title: "" };
   }
   onChangeText = title => {
     this.setState({ title: title });
+  };
+  submit = () => {
+    const { title } = this.state;
     if (title && title.trim() != "") {
-      getDeck(title).then(deck => {
-        if (deck) {
-          this.setState({ deckExists: true });
-        } else {
-          this.setState({ deckExists: false });
-        }
+      Keyboard.dismiss();
+      this.setState({ title: "" }, () => {
+        this.props.createNewDeck({ name: title });
+        this.props.navigation.navigate("ViewDeck", { title: title });
       });
     }
   };
-  submit = () => {
-    var title = this.state.title;
-    if (title && title.trim() != "") {
-      saveDeckTitle(title);
-      this.setState({ title: "" });
-      this.props.navigation.navigate("ViewDeck", { title: title });
-    }
-  };
   render() {
+    const deckExists = this.props.deckIds.includes(this.state.title);
     return (
       <KeyboardAwareScrollView
         style={{ backgroundColor: blue }}
@@ -69,7 +47,7 @@ export default class NewDeck extends Component {
             placeholder="Deck title"
           />
         </View>
-        {this.state.deckExists && (
+        {deckExists && (
           <View style={styles.errorContainer}>
             <Text style={styles.errorLabel}>
               Deck with title{" "}
@@ -83,7 +61,7 @@ export default class NewDeck extends Component {
             </Text>
           </View>
         )}
-        <SubmitBtn onPress={this.submit} disabled={this.state.deckExists} />
+        <SubmitBtn onPress={this.submit} disabled={deckExists} />
       </KeyboardAwareScrollView>
     );
   }
@@ -99,30 +77,6 @@ const styles = StyleSheet.create({
   },
   textWrapper: {
     marginBottom: 15
-  },
-  iosSubmitBtn: {
-    backgroundColor: purple,
-    padding: 10,
-    borderRadius: 7,
-    height: 45,
-    marginLeft: 40,
-    marginRight: 40
-  },
-  androidSubmitBtn: {
-    backgroundColor: purple,
-    padding: 10,
-    paddingLeft: 30,
-    paddingRight: 30,
-    height: 45,
-    borderRadius: 2,
-    alignSelf: "flex-end",
-    justifyContent: "center",
-    alignItems: "center"
-  },
-  submitBtnText: {
-    color: white,
-    fontSize: 22,
-    textAlign: "center"
   },
   titleTextInput: {
     height: 40,
@@ -154,3 +108,9 @@ const styles = StyleSheet.create({
     color: orange
   }
 });
+
+const mapStateToProps = ({ decks }) => ({ deckIds: getDeckIds(decks) });
+export default connect(
+  mapStateToProps,
+  { createNewDeck }
+)(NewDeck);

@@ -1,32 +1,15 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
+import { Keyboard } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { purple, white, blue, gray, orange } from "../utils/colors";
-import { addCardToDeck } from "../utils/deckstorage";
+import { connect } from "react-redux";
+import { SubmitBtn } from "../components/buttons/AddCard";
+import { white, blue, gray, orange } from "../utils/colors";
+import addCardToDeck from "../state/actions/decks/action.addCardToDeck";
 
-import {
-  View,
-  TouchableOpacity,
-  Text,
-  TextInput,
-  StyleSheet,
-  Platform
-} from "react-native";
+import { View, Text, TextInput, StyleSheet, Platform } from "react-native";
 
-function SubmitBtn({ onPress }) {
-  return (
-    <TouchableOpacity
-      style={
-        Platform.OS === "ios" ? styles.iosSubmitBtn : styles.androidSubmitBtn
-      }
-      onPress={onPress}
-    >
-      <Text style={styles.submitBtnText}>Submit</Text>
-    </TouchableOpacity>
-  );
-}
-
-export default class AddCard extends Component {
+class AddCard extends Component {
   static propTypes = {
     navigation: PropTypes.object.isRequired
   };
@@ -41,13 +24,12 @@ export default class AddCard extends Component {
     this.setState({ answer: answer });
   };
   submit = () => {
-    const { title } = this.props.navigation.state.params;
-    var question = this.state.question;
-    var answer = this.state.answer;
+    const { question, answer } = this.state;
+    const deckName = this.props.navigation.state.params.title;
     if (question && question.trim() != "" && answer && answer.trim() != "") {
-      addCardToDeck(title, { question: question, answer: answer }).then(() => {
-        this.setState({ question: "", answer: "" });
-        this.props.navigation.state.params.refresh();
+      Keyboard.dismiss();
+      this.setState({ question: "", answer: "" }, () => {
+        this.props.addCardToDeck({ deckName, card: { question, answer } });
         this.props.navigation.goBack();
       });
     }
@@ -94,30 +76,6 @@ const styles = StyleSheet.create({
   textWrapper: {
     marginBottom: 15
   },
-  iosSubmitBtn: {
-    backgroundColor: purple,
-    padding: 10,
-    borderRadius: 7,
-    height: 45,
-    marginLeft: 40,
-    marginRight: 40
-  },
-  androidSubmitBtn: {
-    backgroundColor: purple,
-    padding: 10,
-    paddingLeft: 30,
-    paddingRight: 30,
-    height: 45,
-    borderRadius: 2,
-    alignSelf: "flex-end",
-    justifyContent: "center",
-    alignItems: "center"
-  },
-  submitBtnText: {
-    color: white,
-    fontSize: 22,
-    textAlign: "center"
-  },
   titleTextInput: {
     height: 40,
     borderColor: gray,
@@ -148,3 +106,7 @@ const styles = StyleSheet.create({
     color: orange
   }
 });
+export default connect(
+  null,
+  { addCardToDeck }
+)(AddCard);

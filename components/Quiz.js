@@ -1,73 +1,23 @@
 import React, { Component } from "react";
-import { AppLoading } from "expo";
 import PropTypes from "prop-types";
-import { purple, white, blue, gray, orange, red, green } from "../utils/colors";
-import { getDeck } from "../utils/deckstorage";
-
+import { connect } from "react-redux";
+import getDeckQuestionsShuffled from "../state/selectors/decks/selector.getDeckQuestionsShuffled";
+import { white, blue } from "../utils/colors";
 import {
-  View,
-  TouchableOpacity,
-  Text,
-  StyleSheet,
-  Platform
-} from "react-native";
+  CorrectBtn,
+  IncorrectBtn,
+  BackBtn,
+  QuesToggleBtn
+} from "../components/buttons/Quiz";
+import { View, Text, StyleSheet } from "react-native";
 
-function CorrectBtn({ onPress }) {
-  return (
-    <TouchableOpacity
-      style={
-        Platform.OS === "ios" ? styles.iosCorrectBtn : styles.androidCorrectBtn
-      }
-      onPress={onPress}
-    >
-      <Text style={styles.correctBtnText}>Correct</Text>
-    </TouchableOpacity>
-  );
-}
-
-function IncorrectBtn({ onPress }) {
-  return (
-    <TouchableOpacity
-      style={
-        Platform.OS === "ios"
-          ? styles.iosIncorrectBtn
-          : styles.androidIncorrectBtn
-      }
-      onPress={onPress}
-    >
-      <Text style={styles.incorrectBtnText}>Incorrect</Text>
-    </TouchableOpacity>
-  );
-}
-
-function BackBtn({ onPress, text }) {
-  return (
-    <TouchableOpacity
-      style={Platform.OS === "ios" ? styles.iosBackBtn : styles.androidBackBtn}
-      onPress={onPress}
-    >
-      <Text style={styles.backBtnText}>{text}</Text>
-    </TouchableOpacity>
-  );
-}
-
-function QuesToggleBtn({ onPress, text }) {
-  return (
-    <TouchableOpacity onPress={onPress}>
-      <Text style={styles.quesToggleBtn}>{text}</Text>
-    </TouchableOpacity>
-  );
-}
-
-export default class Quiz extends Component {
+class Quiz extends Component {
   static propTypes = {
     navigation: PropTypes.object.isRequired
   };
   constructor(props) {
     super(props);
     this.state = {
-      ready: false,
-      deck: {},
       questionNo: 1,
       quesView: true,
       quesAnsCorrect: 0
@@ -78,12 +28,16 @@ export default class Quiz extends Component {
     const { quesAnsCorrect, questionNo } = this.state;
     var ansCorrect = quesAnsCorrect + 1;
     var quesNo = questionNo + 1;
-    this.setState({ quesAnsCorrect: ansCorrect, questionNo: quesNo });
+    this.setState({
+      quesAnsCorrect: ansCorrect,
+      questionNo: quesNo,
+      quesView: true
+    });
   };
   onIncorrect = () => {
     const { questionNo } = this.state;
     var quesNo = questionNo + 1;
-    this.setState({ questionNo: quesNo });
+    this.setState({ questionNo: quesNo, quesView: true });
   };
   onRestartQuiz = () => {
     this.setState({ questionNo: 1, quesAnsCorrect: 0, quesView: true });
@@ -95,68 +49,56 @@ export default class Quiz extends Component {
     const { quesView } = this.state;
     this.setState({ quesView: !quesView });
   };
-  componentDidMount() {
-    const { title } = this.props.navigation.state.params;
-    getDeck(title).then(deck => {
-      if (deck) {
-        this.setState({ deck: deck, ready: true });
-      }
-    });
-  }
   render() {
-    const { ready, deck, questionNo, quesView, quesAnsCorrect } = this.state;
-    if (ready === false) {
-      return <AppLoading />;
-    } else {
-      var noOfQues = deck.questions.length;
-      var isComplete = questionNo > noOfQues;
-      var percentage = quesAnsCorrect / noOfQues * 100;
-      return (
-        <View style={styles.containerBg}>
-          <View style={styles.container}>
-            {!isComplete && (
-              <Text style={styles.quesNoText}>
-                {questionNo}/{noOfQues}
+    const { questionNo, quesView, quesAnsCorrect } = this.state;
+    const { questions } = this.props;
+    var noOfQues = questions.length;
+    var isComplete = questionNo > noOfQues;
+    const { question, answer } = !isComplete
+      ? questions[questionNo - 1]
+      : { question: undefined, answer: undefined };
+    var percentage = (quesAnsCorrect / noOfQues) * 100;
+    return (
+      <View style={styles.containerBg}>
+        <View style={styles.container}>
+          {!isComplete && (
+            <Text style={styles.quesNoText}>
+              {questionNo}/{noOfQues}
+            </Text>
+          )}
+          <View style={styles.quesContainer}>
+            {!isComplete ? (
+              quesView ? (
+                <Text style={styles.quesText}>{question}</Text>
+              ) : (
+                <Text style={styles.quesText}>{answer}</Text>
+              )
+            ) : (
+              <Text style={styles.resultText}>
+                You have answered {percentage}% correctly.
               </Text>
             )}
-            <View style={styles.quesContainer}>
-              {!isComplete ? (
-                quesView ? (
-                  <Text style={styles.quesText}>
-                    {deck.questions[questionNo - 1].question}
-                  </Text>
-                ) : (
-                  <Text style={styles.quesText}>
-                    {deck.questions[questionNo - 1].answer}
-                  </Text>
-                )
-              ) : (
-                <Text style={styles.resultText}>
-                  You have answered {percentage}% correctly.
-                </Text>
-              )}
-              {!isComplete && (
-                <QuesToggleBtn
-                  onPress={this.onToggle}
-                  text={quesView ? "Show Answer" : "Show Question"}
-                />
-              )}
-            </View>
-            {!isComplete ? (
-              <View style={styles.btnContainer}>
-                <CorrectBtn onPress={this.onCorrect} />
-                <IncorrectBtn onPress={this.onIncorrect} />
-              </View>
-            ) : (
-              <View style={styles.btnContainer}>
-                <BackBtn onPress={this.onRestartQuiz} text="Restart Quiz" />
-                <BackBtn onPress={this.onBackToDeck} text="Back to Deck" />
-              </View>
+            {!isComplete && (
+              <QuesToggleBtn
+                onPress={this.onToggle}
+                text={quesView ? "Show Answer" : "Show Question"}
+              />
             )}
           </View>
+          {!isComplete ? (
+            <View style={styles.btnContainer}>
+              <CorrectBtn onPress={this.onCorrect} />
+              <IncorrectBtn onPress={this.onIncorrect} />
+            </View>
+          ) : (
+            <View style={styles.btnContainer}>
+              <BackBtn onPress={this.onRestartQuiz} text="Restart Quiz" />
+              <BackBtn onPress={this.onBackToDeck} text="Back to Deck" />
+            </View>
+          )}
         </View>
-      );
-    }
+      </View>
+    );
   }
 }
 
@@ -190,101 +132,13 @@ const styles = StyleSheet.create({
     color: white,
     marginTop: 30
   },
-  iosCorrectBtn: {
-    backgroundColor: green,
-    padding: 10,
-    borderRadius: 7,
-    height: 45,
-    width: 160,
-    marginLeft: 40,
-    marginRight: 40,
-    marginTop: 10,
-    marginBottom: 20
-  },
-  androidCorrectBtn: {
-    backgroundColor: green,
-    padding: 10,
-    paddingLeft: 30,
-    paddingRight: 30,
-    height: 45,
-    width: 160,
-    borderRadius: 2,
-    alignSelf: "flex-end",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 10,
-    marginBottom: 20
-  },
-  correctBtnText: {
-    color: white,
-    fontSize: 22,
-    textAlign: "center"
-  },
-  iosIncorrectBtn: {
-    backgroundColor: red,
-    padding: 10,
-    borderRadius: 7,
-    height: 45,
-    width: 160,
-    marginLeft: 40,
-    marginRight: 40,
-    marginTop: 10,
-    marginBottom: 20
-  },
-  androidIncorrectBtn: {
-    backgroundColor: red,
-    padding: 10,
-    paddingLeft: 30,
-    paddingRight: 30,
-    height: 45,
-    width: 160,
-    borderRadius: 2,
-    alignSelf: "flex-end",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 10,
-    marginBottom: 20
-  },
-  incorrectBtnText: {
-    color: white,
-    fontSize: 22,
-    textAlign: "center"
-  },
-  iosBackBtn: {
-    backgroundColor: purple,
-    padding: 10,
-    borderRadius: 7,
-    height: 45,
-    width: 160,
-    marginLeft: 40,
-    marginRight: 40,
-    marginTop: 10,
-    marginBottom: 20
-  },
-  androidBackBtn: {
-    backgroundColor: purple,
-    padding: 10,
-    paddingLeft: 30,
-    paddingRight: 30,
-    height: 45,
-    width: 160,
-    borderRadius: 2,
-    alignSelf: "flex-end",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 10,
-    marginBottom: 20
-  },
-  backBtnText: {
-    color: white,
-    fontSize: 22,
-    textAlign: "center"
-  },
-  quesToggleBtn: {
-    color: orange
-  },
   quesNoText: {
     color: white,
     margin: 10
   }
 });
+const mapStateToProps = ({ decks }, props) => {
+  const deckTitle = props.navigation.state.params.title;
+  return { questions: getDeckQuestionsShuffled(decks, deckTitle) };
+};
+export default connect(mapStateToProps)(Quiz);
